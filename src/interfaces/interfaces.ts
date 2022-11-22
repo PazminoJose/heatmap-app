@@ -2,7 +2,7 @@ export interface Coordinates {
     lat: number,
     lng: number
 }
-export interface CoordinatesAPIKeyResponse {
+export interface CoordinatesAndAPIKeyResponse {
     api_key: string,
     coordinates: Array<Coordinates>
 }
