@@ -1,33 +1,42 @@
-import { Wrapper } from '@googlemaps/react-wrapper';
-import { ReactElement, useEffect, useRef, useState } from 'react';
+import { Status, Wrapper } from '@googlemaps/react-wrapper';
+import { ReactElement, useEffect, useState } from 'react';
 import './App.css';
 import Map from './components/map';
-import { Coordinates, MapProps } from './interfaces/interfaces';
-import { getCoordinatesAndApiKey } from './services/map';
+import { CoordinatesAndAPIKeyResponse, MapProps } from './interfaces/interfaces';
+import { getCoordinatesAndApiKey } from './services/mapService';
 
 function App(): ReactElement {
   const defaultMapProps: MapProps = {
     center: {
-      lat: 37.775, lng: -122.434
+      lat: -1.3460634739251633, lng: -78.56483353462201
     },
     zoom: 11
   };
-  const [coordinates, setCoordinates] = useState<Array<Coordinates>>(new Array<Coordinates>())
-  const api_key = useRef<string>('')
+  const defaultCoordinatesApiKey: CoordinatesAndAPIKeyResponse = {
+    api_key: "",
+    coordinates: []
+  }
+  const [coordinatesApiKey, setCoordinatesApiKey] = useState<CoordinatesAndAPIKeyResponse>(defaultCoordinatesApiKey);
   useEffect(() => {
     async function loadMap() {
       const response = await getCoordinatesAndApiKey();
       if (typeof response != 'string') {
-        setCoordinates(response.coordinates);
-        api_key.current = response.api_key;
+        setCoordinatesApiKey((prev) => response);
       }
     }
     loadMap()
-  });
+  }, [coordinatesApiKey]);
+  const render = (status: Status) => {
+    return <h1>{status}</h1>;
+  };
   return (
-    <Wrapper apiKey={api_key.current} libraries={['visualization']}  >
-      <Map mapProps={defaultMapProps} coordinates={coordinates} />
-    </Wrapper>
+    <>
+      {coordinatesApiKey.api_key !== "" &&
+        <Wrapper apiKey={coordinatesApiKey?.api_key} libraries={['visualization']} render={render}  >
+          <Map mapProps={defaultMapProps} coordinates={coordinatesApiKey?.coordinates} />
+        </Wrapper>
+      }
+    </>
   );
 }
 
